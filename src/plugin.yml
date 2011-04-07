@@ -1,0 +1,18 @@
+name: SignTrader
+main: com.polycrypt.bukkit.plugin.darknesschaos.SignTrader.SignTrader
+version: 1.0.6
+website: http://polycrypt.com
+author: Darknesschaos
+description: Trade using signs with this plugin.
+commands:
+  signtrader:
+    description: Activates signs that players trade with.
+    usage: |
+           /<command>
+           Example: /<command> -sc - Toggles the commanding players ability to link chests and signs they own.
+           Example: /<command> -sc -p - Toggles the commanding player until toggled off.
+  getdata:
+    description: Sends the item in hands data to the command user.
+    usage: |
+           /<command>
+           Example: /<command>
