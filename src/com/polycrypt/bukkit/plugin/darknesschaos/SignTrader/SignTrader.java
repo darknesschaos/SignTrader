@@ -11,15 +11,17 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.polycrypt.bukkit.tools.darknesschaos.ChestProtectionHandler;
-import com.polycrypt.bukkit.tools.darknesschaos.EconomyHandler;
+import com.polycrypt.bukkit.tools.darknesschaos.EconServerListener;
 import com.polycrypt.bukkit.tools.darknesschaos.PermissionsHandler;
+
+import com.nijikokun.register.payment.Method;
 
 public class SignTrader extends JavaPlugin{
 
 	public final Logger log = Logger.getLogger("Minecraft");
 	
 	public final String name = "SignTrader";
-	public final String version = "1.0.6";
+	public final String version = "1.0.9";
 	
 	//File Handler
 	FileOperations fileIO = new FileOperations(this);
@@ -36,9 +38,12 @@ public class SignTrader extends JavaPlugin{
 	// Listeners
 	public final SignTraderBlockListener blockListener = new SignTraderBlockListener(this);
 	public final SignTraderPlayerListener playerListener = new SignTraderPlayerListener(this);
-
+	public final EconServerListener server = new EconServerListener(this);
+	
 	public File makeFolder = this.getDataFolder();
 	public SignManager sm = new SignManager(this);
+
+	public Method Method = null;
 	
 	public void onEnable() {
 		PluginManager pm = this.getServer().getPluginManager();
@@ -47,10 +52,11 @@ public class SignTrader extends JavaPlugin{
 		pm.registerEvent(Event.Type.BLOCK_PLACE, this.blockListener, Event.Priority.High, this);
 		pm.registerEvent(Event.Type.BLOCK_DAMAGE, this.blockListener, Event.Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_INTERACT, this.playerListener, Event.Priority.Normal, this);
+        pm.registerEvent(Event.Type.PLUGIN_ENABLE, this.server, Event.Priority.Monitor, this);
+        pm.registerEvent(Event.Type.PLUGIN_DISABLE, this.server, Event.Priority.Monitor, this);
 		
 		//Setup the handlers
 		ChestProtectionHandler.setupChestProtection(this);
-		EconomyHandler.setupEconomy(this);
 		PermissionsHandler.setupPermissions(this);
 		fileIO.checkDataFolder();
 		fileIO.loadItemData();

@@ -1,6 +1,6 @@
 name: SignTrader
 main: com.polycrypt.bukkit.plugin.darknesschaos.SignTrader.SignTrader
-version: 1.0.6
+version: 1.0.9
 website: http://polycrypt.com
 author: Darknesschaos
 description: Trade using signs with this plugin.

@@ -4,7 +4,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.block.Sign;
-import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Player;
 
 import com.polycrypt.bukkit.tools.darknesschaos.ChestOperator;
@@ -79,7 +78,10 @@ public class SignManager {
 			plugin.fileIO.saveGlobalSigns();
 		}
 		
-		((CraftWorld)s.getWorld()).getHandle().g(s.getX(),s.getY(),s.getZ());
+		if(s.getState() instanceof Sign)
+			((Sign)s.getState()).update();
+		
+		// ((CraftWorld)s.getWorld()).getHandle().g(s.getX(),s.getY(),s.getZ()); // no longer works
 	}
 	
 	public void useSign(Sign s, Player p) {
@@ -175,6 +177,8 @@ public class SignManager {
 		if (signType.compareToIgnoreCase(globalStr) == 0){
 			if (!PlayerOperator.playerHasEnough(lOneData[0], lOneData[1], lOneData[2], p))
 				p.sendMessage(plugName + PlayerOperator.playerStockErr);
+			else if (!PlayerOperator.playerHasEnoughSpace(lTwoData[0], lTwoData[1], lTwoData[2], p))
+				p.sendMessage(plugName + PlayerOperator.playerSpaceErr);
 			else {
 				PlayerOperator.removeFromPlayer(lOneData[0], lOneData[1], lOneData[2], p);
 				PlayerOperator.givePlayerItem(lTwoData[0], lTwoData[1], lTwoData[2], p);
@@ -187,6 +191,8 @@ public class SignManager {
 				p.sendMessage(plugName + ChestOperator.notEnoughErr);
 			else if (!ChestOperator.hasEnoughSpace(lOneData[0], lOneData[1], lOneData[2], chest))
 				p.sendMessage(plugName + ChestOperator.notEnoughSpaceErr);
+			else if (!PlayerOperator.playerHasEnoughSpace(lTwoData[0], lTwoData[1], lTwoData[2], p))
+				p.sendMessage(plugName + PlayerOperator.playerSpaceErr);
 			
 			else {
 				ChestOperator.removeFromChestStock(lTwoData[0], lTwoData[1], lTwoData[2], chest);
@@ -237,9 +243,13 @@ public class SignManager {
 				p.sendMessage(plugName + EconomyHandler.getEconError(econ));
 				return;
 			}
-			EconomyHandler.modifyMoney(p.getName(), -costAmount);
-			p.sendMessage(plugName + "You now have " + EconomyHandler.playerHave(p.getName()) + ".");
-			PlayerOperator.givePlayerItem(lTwoData[0], lTwoData[1], lTwoData[2], p);
+			else if (!PlayerOperator.playerHasEnoughSpace(lTwoData[0], lTwoData[1], lTwoData[2], p))
+				p.sendMessage(plugName + PlayerOperator.playerSpaceErr);
+			else {
+				EconomyHandler.modifyMoney(p.getName(), -costAmount);
+				p.sendMessage(plugName + "You now have " + EconomyHandler.playerHave(p.getName()) + ".");
+				PlayerOperator.givePlayerItem(lTwoData[0], lTwoData[1], lTwoData[2], p);
+			}
 		}
 		else if (signType.compareToIgnoreCase(personalStr) == 0){
 			int econPlayer = EconomyHandler.hasEnough(p.getName(), costAmount);
@@ -280,10 +290,14 @@ public class SignManager {
 	}
 
 	private void giveFree(String signType, Player p, Chest chest, int[] lTwoData) {
-		if (signType.compareToIgnoreCase(globalStr) == 0)
+		if (!PlayerOperator.playerHasEnoughSpace(lTwoData[0], lTwoData[1], lTwoData[2], p))
+			p.sendMessage(plugName + PlayerOperator.playerSpaceErr);
+		else if (signType.compareToIgnoreCase(globalStr) == 0)
 			PlayerOperator.givePlayerItem(lTwoData[0], lTwoData[1], lTwoData[2], p);
 		else if (signType.compareToIgnoreCase(personalStr) == 0){
-			if (ChestOperator.containsEnough(lTwoData[0], lTwoData[1], lTwoData[2], chest)){
+			if (!PlayerOperator.playerHasEnoughSpace(lTwoData[0], lTwoData[1], lTwoData[2], p))
+				p.sendMessage(plugName + PlayerOperator.playerSpaceErr);
+			else if (ChestOperator.containsEnough(lTwoData[0], lTwoData[1], lTwoData[2], chest)){
 				ChestOperator.removeFromChestStock(lTwoData[0], lTwoData[1], lTwoData[2], chest);
 				PlayerOperator.givePlayerItem(lTwoData[0], lTwoData[1], lTwoData[2], p);
 			}
@@ -303,12 +317,14 @@ public class SignManager {
 			return;
 		}
 		
-		String chestOwner = ChestProtectionHandler.getChestOwner(c.getBlock());
-		if (chestOwner.compareToIgnoreCase(p.getName()) == 0 ||
-				chestOwner.compareToIgnoreCase("-noprotection") == 0){
+		String name = ChestProtectionHandler.getChestOwner(c.getBlock());
+		int length = p.getName().length();
+		if(length > 15) length = 15;
+		if(name.equals(p.getName().substring(0, length)) ||
+				name.compareToIgnoreCase("-noprotection") == 0){
 			p.sendMessage(plugName + "Sign and chest linked.");
 		}
-		else if (chestOwner.compareToIgnoreCase("-NoOwner") == 0){
+		else if (name.compareToIgnoreCase("-NoOwner") == 0){
 			p.sendMessage(plugName + "The chest needs to be protected first.");
 			return;
 		}
@@ -335,6 +351,9 @@ public class SignManager {
 		String location = s.getX() + ":" + s.getY() + ":" + s.getZ()  + ":" + s.getWorld().getName();
 		SignTrader.signLocs.put(location, str);
 		plugin.fileIO.saveGlobalSigns();
-		((CraftWorld)s.getWorld()).getHandle().g(s.getX(),s.getY(),s.getZ());
+		
+		s.update();
+		
+		// ((CraftWorld)s.getWorld()).getHandle().g(s.getX(),s.getY(),s.getZ()); // no longer works
 	}
 }

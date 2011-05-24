@@ -2,6 +2,7 @@ package com.polycrypt.bukkit.plugin.darknesschaos.SignTrader;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.block.Sign;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -19,6 +20,10 @@ public class SignTraderBlockListener extends BlockListener{
 	}
 	
 	public void onSignChange (SignChangeEvent e) {
+		Location location = e.getBlock().getLocation();
+		String loc = location.getBlockX() + ":" + location.getBlockY() + ":" + location.getBlockZ() + ":" + location.getWorld().toString();
+		if (!e.isCancelled() && SignTrader.signLocs.containsKey(loc))
+			SignTrader.signLocs.remove(loc);
 		plugin.sm.setSign(e.getLines(), e.getPlayer(), e.getBlock());
 	}
 	
@@ -34,5 +39,15 @@ public class SignTraderBlockListener extends BlockListener{
 		String loc = location.getBlockX() + ":" + location.getBlockY() + ":" + location.getBlockZ() + ":" + location.getWorld().toString();
 		if (!e.isCancelled() && SignTrader.signLocs.containsKey(loc))
 			SignTrader.signLocs.remove(loc);
+		
+		Sign[] signs = SignOperator.getAttachedSigns(e.getBlock());
+		for (Sign sign : signs) {
+			if (sign != null) {
+				location = sign.getBlock().getLocation();
+				loc = location.getBlockX() + ":" + location.getBlockY() + ":" + location.getBlockZ() + ":" + location.getWorld().toString();
+				if (!e.isCancelled() && SignTrader.signLocs.containsKey(loc))
+					SignTrader.signLocs.remove(loc);
+			}
+		}
 	}
 }

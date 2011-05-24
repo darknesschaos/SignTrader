@@ -56,8 +56,11 @@ public class SignTraderPlayerListener extends PlayerListener {
 			if (playerChest.get(p) == (Chest)b.getState())
 				p.sendMessage(plugName + "You have already marked that chest.");
 			else {
-				if (ChestProtectionHandler.getChestOwner(b).compareToIgnoreCase(p.getName()) != 0 &&
-						ChestProtectionHandler.getChestOwner(b).compareToIgnoreCase("-noprotection") != 0){
+				String name = ChestProtectionHandler.getChestOwner(b);
+				int length = p.getName().length();
+				if(length > 15) length = 15;
+				if ( !name.equals(p.getName().substring(0, length))&&
+						name.compareToIgnoreCase("-noprotection") != 0){
 					p.sendMessage(plugName + "That is not your chest.");
 					return;
 				}

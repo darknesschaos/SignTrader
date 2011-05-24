@@ -178,7 +178,7 @@ public class SignOperator {
 		if (getType == 35)
 			getTypeText = woolText(getDamage);
 		else if (getType == -1){
-			getTypeText = EconomyHandler.currencyName;
+			getTypeText = EconomyHandler.getCurrencyName();
 		}
 		else {
 			getTypeText = Material.getMaterial(getType).toString().toLowerCase(Locale.ENGLISH);
@@ -190,7 +190,7 @@ public class SignOperator {
 		if (giveType == 35)
 			giveTypeText = woolText(giveDamage);
 		else if (giveType == -1){
-			giveTypeText = EconomyHandler.currencyName;
+			giveTypeText = EconomyHandler.getCurrencyName();
 		}
 		else {
 			giveTypeText = Material.getMaterial(giveType).toString().toLowerCase(Locale.ENGLISH);
@@ -314,13 +314,16 @@ public class SignOperator {
 				Block c = s.getWorld().getBlockAt(x, y, z);
 				if (c.getState() instanceof Chest){
 					String getOwner = ChestProtectionHandler.getChestOwner(c);
+					int length = pName.length();
+					if(length > 15) length = 15;
+					
 					if (getOwner.compareToIgnoreCase("-noprotection") == 0){
 						return 0;
 					}
 					else if (getOwner.compareToIgnoreCase("-NoOwner") == 0){
 						return -4;
 					}
-					else if (getOwner.compareToIgnoreCase(pName) == 0){
+					else if(getOwner.equals(pName.substring(0, length))){
 						return 1;
 					}
 					else
@@ -339,13 +342,15 @@ public class SignOperator {
 			Block c = s.getBlock().getRelative(BlockFace.DOWN);
 			if (c.getState() instanceof Chest){
 				String getOwner = ChestProtectionHandler.getChestOwner(c);
+				int length = pName.length();
+				if(length > 15) length = 15;
 				if (getOwner.compareToIgnoreCase("-noprotection") == 0){
 					return 0;
 				}
 				else if (getOwner.compareToIgnoreCase("-NoOwner") == 0){
 					return -4;
 				}
-				else if (getOwner.compareToIgnoreCase(pName) == 0){
+				else if(getOwner.equals(pName.substring(0, length))){
 					return 1;
 				}
 				else
@@ -412,5 +417,40 @@ public class SignOperator {
 			bool = p.isOp();
 		
 		return bool;
+	}
+
+	public static Sign[] getAttachedSigns(Block b) {
+		Sign[] signs = new Sign[5]; 
+		
+		Block check = b.getRelative(BlockFace.UP);
+		if (check instanceof Sign &&
+				check.getType() == Material.SIGN_POST)
+			signs[0] = (Sign)check;
+		
+		check = b.getRelative(BlockFace.NORTH);
+		if (check instanceof Sign &&
+				check.getType() == Material.WALL_SIGN &&
+				check.getData() == (byte)4)
+			signs[1] = (Sign)check;
+		
+		check = b.getRelative(BlockFace.EAST);
+		if (check instanceof Sign &&
+				check.getType() == Material.WALL_SIGN &&
+				check.getData() == (byte)2)
+			signs[2] = (Sign)check;
+		
+		check = b.getRelative(BlockFace.SOUTH);
+		if (check instanceof Sign &&
+				check.getType() == Material.WALL_SIGN &&
+				check.getData() == (byte)5)
+			signs[3] = (Sign)check;
+		
+		check = b.getRelative(BlockFace.WEST);
+		if (check instanceof Sign &&
+				check.getType() == Material.WALL_SIGN &&
+				check.getData() == (byte)3)
+			signs[4] = (Sign)check;
+		
+		return signs;
 	}
 }

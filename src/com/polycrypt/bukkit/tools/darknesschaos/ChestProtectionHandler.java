@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.bukkit.block.Block;
 import org.bukkit.plugin.Plugin;
+import org.yi.acru.bukkit.Lockette.Lockette;
 
 import com.griefcraft.lwc.LWC;
 import com.griefcraft.lwc.LWCPlugin;
@@ -14,6 +15,7 @@ public class ChestProtectionHandler {
 	
 	private static boolean chestProtectionEnabled = false;
 	private static LWC lwc = null;
+	private static Lockette lockette = null;
 	
 	public static void setupChestProtection(SignTrader plugin){
 		
@@ -22,6 +24,13 @@ public class ChestProtectionHandler {
         if (test != null){
         	plugin.log.info("["+plugin.name+"] LWC found, using it.");
         	lwc = (LWC) ((LWCPlugin) test).getLWC();
+        	chestProtectionEnabled = true;
+        }
+        
+        test = plugin.getServer().getPluginManager().getPlugin("Lockette");
+        if (test != null) {
+        	plugin.log.info("["+plugin.name+"] Lockette found, using it.");
+        	lockette = (Lockette)test;
         	chestProtectionEnabled = true;
         }
     }
@@ -36,12 +45,6 @@ public class ChestProtectionHandler {
 			}
 			
 			List<Block> blocksProtected = lwc.getProtectionSet(chest.getWorld(), chest.getX(), chest.getY(), chest.getZ());
-			/*
-			 * The block is possibly protected! This contains the matched protected blocks
-			 * It is the core method used, since i.e only 1 side of a double chest needs 
-			 * to be protected,
-			 * both sides ARE not protected, it just *seems* that way
-			 */
 			if(blocksProtected.size() > 0) {
 				for(Block block : blocksProtected) {
 					Protection protection = lwc.findProtection(block.getWorld(), block.getX(), block.getY(), block.getZ());
@@ -52,6 +55,19 @@ public class ChestProtectionHandler {
 			}
 			return "-NoOwner";
 		}
+		
+		else if (lockette != null){
+			try {
+				String name = Lockette.getProtectedOwner(chest);
+				if (name != null)
+					return name;
+				else
+					return "-NoOwner";
+			}
+			catch(Exception e) {
+			}
+		}
+			
 		return "-noprotection";
 	}
 }
